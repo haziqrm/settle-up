@@ -17,12 +17,6 @@ public class BalanceRepository {
         this.jdbc = jdbc;
     }
 
-    /**
-     * Balances are always derived from the ledger, never stored, so they cannot drift from
-     * the entries. Starting from group_members with a LEFT JOIN means a member with no
-     * entries still appears, with 0. One SELECT reads one consistent snapshot, so the
-     * returned balances sum to zero even while expenses are being added.
-     */
     public List<MemberBalance> balancesOf(long groupId) {
         return jdbc.query("""
                 SELECT u.id, u.display_name, COALESCE(SUM(l.amount_pence), 0) AS balance

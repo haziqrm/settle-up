@@ -11,13 +11,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Creates a few users and a group at startup so the API can be tried without auth.
- * Only exists under the "dev" profile, so it can never run in tests or production.
- * Idempotent: if the seed group already exists it does nothing, so restarts are safe
- * against the persistent Docker Compose database.
- */
 @Component
 @Profile("dev")
 public class DevSeed implements ApplicationRunner {

@@ -16,7 +16,6 @@ public final class ExpenseLedger {
         if (new HashSet<>(participantIds).size() != participantIds.size())
             throw new IllegalArgumentException("duplicate participants");
 
-        // Sort so the extra penny always goes to the same person, whatever order the caller used.
         List<Long> sorted = participantIds.stream().sorted().toList();
         List<Long> shares = MoneySplitter.splitEqually(totalPence, sorted.size());
 

@@ -10,21 +10,21 @@ import java.util.List;
  * append-only (DELETE and TRUNCATE are blocked), so tests share one database and each
  * one only looks at its own group.
  */
-final class LedgerFixtures {
+public final class LedgerFixtures {
 
-    record Group(long id, List<Long> memberIds) {}
+    public record Group(long id, List<Long> memberIds) {}
 
     private final JdbcTemplate jdbc;
 
-    LedgerFixtures(JdbcTemplate jdbc) {
+    public LedgerFixtures(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
-    long newUser(String name) {
+    public long newUser(String name) {
         return jdbc.queryForObject("INSERT INTO users (display_name) VALUES (?) RETURNING id", Long.class, name);
     }
 
-    Group newGroupWithMembers(int memberCount) {
+    public Group newGroupWithMembers(int memberCount) {
         long groupId = jdbc.queryForObject("INSERT INTO groups (name) VALUES ('Test group') RETURNING id", Long.class);
         List<Long> members = new ArrayList<>();
         for (int i = 0; i < memberCount; i++) {
@@ -35,22 +35,22 @@ final class LedgerFixtures {
         return new Group(groupId, members);
     }
 
-    long ledgerSum(long groupId) {
+    public long ledgerSum(long groupId) {
         return jdbc.queryForObject(
                 "SELECT COALESCE(SUM(amount_pence), 0) FROM ledger_entries WHERE group_id = ?", Long.class, groupId);
     }
 
-    long balanceOf(long groupId, long userId) {
+    public long balanceOf(long groupId, long userId) {
         return jdbc.queryForObject(
                 "SELECT COALESCE(SUM(amount_pence), 0) FROM ledger_entries WHERE group_id = ? AND user_id = ?",
                 Long.class, groupId, userId);
     }
 
-    int expenseCount(long groupId) {
+    public int expenseCount(long groupId) {
         return jdbc.queryForObject("SELECT COUNT(*) FROM expenses WHERE group_id = ?", Integer.class, groupId);
     }
 
-    int ledgerRowCount(long groupId) {
+    public int ledgerRowCount(long groupId) {
         return jdbc.queryForObject("SELECT COUNT(*) FROM ledger_entries WHERE group_id = ?", Integer.class, groupId);
     }
 }

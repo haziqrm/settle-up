@@ -6,11 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * Plain SQL for expenses and their ledger rows. Kept separate from ExpenseService so the
- * transaction boundary lives in the service, and so tests can make one insert fail and
- * check that the other is rolled back.
- */
 @Repository
 public class ExpenseRepository {
 
@@ -20,7 +15,6 @@ public class ExpenseRepository {
         this.jdbc = jdbc;
     }
 
-    /** Inserts the expense and returns its generated id. */
     public long insertExpense(long groupId, long paidBy, String description, long amountPence) {
         Long id = jdbc.queryForObject("""
                 INSERT INTO expenses (group_id, paid_by, description, amount_pence)
@@ -31,7 +25,6 @@ public class ExpenseRepository {
     }
 
     public void insertLedgerLines(long groupId, long expenseId, List<LedgerLine> lines) {
-        // One JDBC batch rather than a round trip per line.
         jdbc.batchUpdate("""
                 INSERT INTO ledger_entries (group_id, user_id, amount_pence, expense_id)
                 VALUES (?, ?, ?, ?)
