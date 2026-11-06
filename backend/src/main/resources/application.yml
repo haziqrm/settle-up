@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/splitsettle
+    username: splitsettle
+    password: devpassword
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
