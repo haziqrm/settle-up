@@ -1,7 +1,11 @@
 package com.settleup.backend.web;
 
 import com.settleup.backend.group.GroupNotFoundException;
+import com.settleup.backend.group.NotGroupMemberException;
 import com.settleup.backend.ledger.InvalidExpenseException;
+import com.settleup.backend.settlement.SettlementExceptions.NothingToSettleException;
+import com.settleup.backend.settlement.SettlementExceptions.RunAlreadyOpenException;
+import com.settleup.backend.settlement.SettlementExceptions.RunNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +40,26 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidExpenseException.class)
     ProblemDetail invalidExpense(InvalidExpenseException e) {
         return problem(HttpStatus.BAD_REQUEST, "Invalid expense", e.getMessage());
+    }
+
+    @ExceptionHandler(NotGroupMemberException.class)
+    ProblemDetail notGroupMember(NotGroupMemberException e) {
+        return problem(HttpStatus.BAD_REQUEST, "Not a group member", e.getMessage());
+    }
+
+    @ExceptionHandler(RunNotFoundException.class)
+    ProblemDetail runNotFound(RunNotFoundException e) {
+        return problem(HttpStatus.NOT_FOUND, "Settlement run not found", e.getMessage());
+    }
+
+    @ExceptionHandler(RunAlreadyOpenException.class)
+    ProblemDetail runAlreadyOpen(RunAlreadyOpenException e) {
+        return problem(HttpStatus.CONFLICT, "Settlement run already open", e.getMessage());
+    }
+
+    @ExceptionHandler(NothingToSettleException.class)
+    ProblemDetail nothingToSettle(NothingToSettleException e) {
+        return problem(HttpStatus.CONFLICT, "Nothing to settle", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
