@@ -4,7 +4,13 @@ spring:
     username: splitsettle
     password: devpassword
   jpa:
+    # No lazy JPA loading in views; keeps DB connections out of the web layer.
+    open-in-view: false
     hibernate:
       ddl-auto: validate
   flyway:
     enabled: true
+  jackson:
+    deserialization:
+      # Money is whole pence. Without this, {"totalPence": 10.5} is silently truncated to 10.
+      accept-float-as-int: false
