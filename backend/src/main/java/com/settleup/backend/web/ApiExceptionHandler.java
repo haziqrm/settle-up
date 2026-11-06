@@ -3,7 +3,13 @@ package com.settleup.backend.web;
 import com.settleup.backend.group.GroupNotFoundException;
 import com.settleup.backend.group.NotGroupMemberException;
 import com.settleup.backend.ledger.InvalidExpenseException;
+import com.settleup.backend.settlement.SettlementExceptions.IllegalPaymentTransitionException;
+import com.settleup.backend.settlement.SettlementExceptions.NotYourPaymentException;
 import com.settleup.backend.settlement.SettlementExceptions.NothingToSettleException;
+import com.settleup.backend.settlement.SettlementExceptions.PayeeNotLinkedException;
+import com.settleup.backend.settlement.SettlementExceptions.PaymentNotFoundException;
+import com.settleup.backend.settlement.SettlementExceptions.PaymentNotPayableException;
+import com.settleup.backend.settlement.provider.ProviderUnavailableException;
 import com.settleup.backend.settlement.SettlementExceptions.RunAlreadyOpenException;
 import com.settleup.backend.settlement.SettlementExceptions.RunNotFoundException;
 import org.slf4j.Logger;
@@ -55,6 +61,37 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(RunAlreadyOpenException.class)
     ProblemDetail runAlreadyOpen(RunAlreadyOpenException e) {
         return problem(HttpStatus.CONFLICT, "Settlement run already open", e.getMessage());
+    }
+
+    @ExceptionHandler(PaymentNotFoundException.class)
+    ProblemDetail paymentNotFound(PaymentNotFoundException e) {
+        return problem(HttpStatus.NOT_FOUND, "Payment not found", e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalPaymentTransitionException.class)
+    ProblemDetail illegalTransition(IllegalPaymentTransitionException e) {
+        return problem(HttpStatus.CONFLICT, "Payment status conflict", e.getMessage());
+    }
+
+    @ExceptionHandler(NotYourPaymentException.class)
+    ProblemDetail notYourPayment(NotYourPaymentException e) {
+        return problem(HttpStatus.BAD_REQUEST, "Not the payer", e.getMessage());
+    }
+
+    @ExceptionHandler(PaymentNotPayableException.class)
+    ProblemDetail notPayable(PaymentNotPayableException e) {
+        return problem(HttpStatus.CONFLICT, "Payment cannot be paid", e.getMessage());
+    }
+
+    @ExceptionHandler(PayeeNotLinkedException.class)
+    ProblemDetail payeeNotLinked(PayeeNotLinkedException e) {
+        return problem(HttpStatus.CONFLICT, "Receiver has no linked account", e.getMessage());
+    }
+
+    @ExceptionHandler(ProviderUnavailableException.class)
+    ProblemDetail providerUnavailable(ProviderUnavailableException e) {
+        log.warn("Payment provider call failed", e);
+        return problem(HttpStatus.BAD_GATEWAY, "Payment provider unavailable", e.getMessage());
     }
 
     @ExceptionHandler(NothingToSettleException.class)

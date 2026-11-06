@@ -46,5 +46,11 @@ class DevSeedIntegrationTest {
                 WHERE m.group_id = ? AND m.role = 'OWNER'
                 """, String.class, groupIds.getFirst());
         assertEquals("Alex", ownerName);
+
+        int linked = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM linked_accounts la JOIN group_members m ON m.user_id = la.user_id
+                WHERE m.group_id = ? AND la.provider = 'FAKE' AND la.status = 'ACTIVE'
+                """, Integer.class, groupIds.getFirst());
+        assertEquals(DevSeed.USERS.size(), linked);
     }
 }

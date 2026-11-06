@@ -40,6 +40,7 @@ public class DevSeed implements ApplicationRunner {
         List<Long> existing = jdbc.queryForList("SELECT id FROM groups WHERE name = ?", Long.class, GROUP_NAME);
         if (!existing.isEmpty()) {
             log.info("Dev seed already present: group {}", existing.getFirst());
+            ensureLinkedAccounts(existing.getFirst());
             return;
         }
 
@@ -54,5 +55,19 @@ public class DevSeed implements ApplicationRunner {
             summary.add(name + "=" + userId);
         }
         log.info("Dev seed created group {} with users {}", groupId, summary);
+        ensureLinkedAccounts(groupId);
+    }
+
+    /** Separate from the group seed so databases seeded before linked accounts existed get them too. */
+    private void ensureLinkedAccounts(long groupId) {
+        int added = jdbc.update("""
+                INSERT INTO linked_accounts (user_id, provider, receiving_ref, display_label)
+                SELECT m.user_id, 'FAKE', 'fake-acct-' || m.user_id, 'Fake Bank ....' || lpad(m.user_id::text, 4, '0')
+                FROM group_members m
+                WHERE m.group_id = ?
+                  AND NOT EXISTS (SELECT 1 FROM linked_accounts la
+                                  WHERE la.user_id = m.user_id AND la.provider = 'FAKE' AND la.status = 'ACTIVE')
+                """, groupId);
+        if (added > 0) log.info("Dev seed linked {} fake bank accounts", added);
     }
 }
